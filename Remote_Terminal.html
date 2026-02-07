@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TERMINAL - BOMB CONTROL SYSTEM</title>
+    <style>
+        body { background-color: #050505; color: #00ff41; font-family: 'Courier New', Courier, monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        #panel { border: 1px solid #00ff41; padding: 40px; border-radius: 5px; box-shadow: 0 0 30px rgba(0, 255, 65, 0.2); text-align: center; background: #000; width: 450px; }
+        h1 { font-size: 1.5em; letter-spacing: 5px; margin-bottom: 30px; border-bottom: 1px solid #00ff41; padding-bottom: 10px; }
+        #timer { font-size: 6em; color: #ff3131; text-shadow: 0 0 20px #ff3131; margin: 20px 0; font-family: 'Digital-7', sans-serif; }
+        .status { font-size: 1em; margin-bottom: 25px; height: 20px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        button { background: transparent; border: 1px solid #00ff41; color: #00ff41; padding: 12px; font-size: 0.9em; cursor: pointer; transition: 0.2s; font-family: inherit; }
+        button:hover { background: #00ff41; color: #000; }
+        .danger { border-color: #ff3131; color: #ff3131; }
+        .danger:hover { background: #ff3131; color: #000; }
+        input { background: #000; border: 1px solid #444; color: #00ff41; padding: 10px; width: 90%; margin-bottom: 10px; text-align: center; }
+        #log { margin-top: 20px; height: 100px; background: #0a0a0a; border: 1px solid #222; font-size: 0.7em; overflow-y: auto; text-align: left; padding: 10px; color: #666; }
+        #connBtn { background: #00ff41; color: #000; font-weight: bold; margin-bottom: 20px; width: 100%; }
+    </style>
+</head>
+<body>
+
+<div id="panel">
+    <h1>REMOTE TERMINAL</h1>
+    <button id="connBtn">CONNECT DEVICE</button>
+    <div class="status" id="stLine">WAITING...</div>
+    <div id="timer">--</div>
+    
+    <div class="grid">
+        <button onclick="send('1')">SYSTEM ON</button>
+        <button onclick="send('0')">SYSTEM OFF</button>
+        <button onclick="send('L')">LAUNCH BOMB</button>
+        <button onclick="send('S')">READ PIN</button>
+    </div>
+
+    <div style="margin-top:20px; border-top: 1px solid #222; padding-top:20px;">
+        <input type="text" id="newPin" placeholder="NEW PIN">
+        <button style="width:100%" onclick="updatePin()">UPDATE PIN (N)</button>
+    </div>
+
+    <div class="grid" style="margin-top:20px;">
+        <button class="danger" onclick="send('I')">REMOTE DEFUSE</button>
+        <button class="danger" onclick="send('P')">REMOTE EXPLODE</button>
+    </div>
+
+    <div id="log">SYSTEM READY.</div>
+</div>
+
+<script>
+    let port, writer, reader;
+
+    async function connect() {
+        try {
+            port = await navigator.serial.requestPort();
+            await port.open({ baudRate: 9600 });
+            document.getElementById('connBtn').innerText = "CONNECTED";
+            document.getElementById('stLine').innerText = "STATUS: ONLINE";
+            writer = port.writable.getWriter();
+            readData();
+        } catch (err) { alert("Error: " + err); }
+    }
+
+    async function send(msg) {
+        if (!writer) return;
+        await writer.write(new TextEncoder().encode(msg));
+        addToLog("COMMAND SENT: " + msg);
+    }
+
+    async function updatePin() {
+        const pin = document.getElementById('newPin').value;
+        if(pin) {
+            await send('N' + pin + '\n');
+            addToLog("NEW PIN REQUEST: " + pin);
+        }
+    }
+
+    async function readData() {
+        const decoder = new TextDecoder();
+        reader = port.readable.getReader();
+        let buffer = "";
+
+        while (true) {
+            try {
+                const { value, done } = await reader.read();
+                if (done) break;
+                buffer += decoder.decode(value);
+
+                if (buffer.includes('\n')) {
+                    let lines = buffer.split('\n');
+                    for (let i = 0; i < lines.length - 1; i++) {
+                        let line = lines[i].trim();
+                        if (!line) continue;
+
+                        if (line.includes("Time:")) {
+                            let t = line.replace("Time:", "").trim();
+                            document.getElementById('timer').innerText = t;
+                        } else if (line.includes("STATUS:")) {
+                            document.getElementById('stLine').innerText = line.replace(">>> ", "");
+                        }
+                        addToLog(line);
+                    }
+                    buffer = lines[lines.length - 1];
+                }
+            } catch (e) { break; }
+        }
+    }
+
+    function addToLog(msg) {
+        const l = document.getElementById('log');
+        let div = document.createElement("div");
+        div.innerHTML = "> " + msg;
+        l.appendChild(div);
+        l.scrollTop = l.scrollHeight;
+    }
+
+    document.getElementById('connBtn').addEventListener('click', connect);
+</script>
+</body>
+</html>
