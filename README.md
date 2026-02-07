@@ -18,6 +18,13 @@ It simulates a movie-style control terminal using RFID authentication, keypad in
 
 ---
 
+## 🚀 Quick Start
+1. Upload the sketch to your Arduino
+2. Register your RFID card UID
+3. Power the system and scan an authorized card
+4. Enter the correct PIN before the timer reaches zero
+
+
 ## 🧠 Core Scenario (How It Works)
 
 1. **Idle State**
@@ -147,3 +154,8 @@ Do not use this project in public spaces, schools, or environments where it coul
 QuantumFuse is about logic, control flow, and presentation — not danger.
 Think of it as a hands-on lesson in embedded systems with style.
 Build smart. Stay ethical. Look cool doing it.
+
+
+## 👤 Author
+Developed by Mhystify 
+Embedded systems & simulation project
