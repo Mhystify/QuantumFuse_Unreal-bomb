@@ -100,8 +100,6 @@ C2	27
 C3	28
 C4	29
 
-cpp
-Copy code
 byte rowPins[4] = {22, 23, 24, 25};
 byte colPins[4] = {26, 27, 28, 29};
 📺 LCD Display (16x2 I2C)
@@ -111,8 +109,6 @@ GND	GND
 SDA	20
 SCL	21
 
-cpp
-Copy code
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 Default I2C address: 0x27
 
@@ -123,78 +119,64 @@ Red LED	3
 
 Use 220Ω resistors in series
 
-cpp
-Copy code
 #define GREEN_LED 2
 #define RED_LED 3
+
+
 🔊 Buzzer
 Buzzer	Arduino Mega
 Signal	4
 GND	GND
 
-cpp
-Copy code
 #define BUZZER 4
+
 🔘 Arm / System Button
 Button	Arduino Mega
 Signal	5
 Other Side	GND
 
-cpp
-Copy code
+
 #define ARM_BUTTON 5
 Uses INPUT_PULLUP
 
 Button is active LOW
 
 📶 Bluetooth Module (HC‑05 / HC‑06)
+
 Bluetooth	Arduino Mega
 TX	RX1 (19)
 RX	TX1 (18)
 VCC	5V
 GND	GND
 
-cpp
-Copy code
 Serial1.begin(9600);
 Hardware Serial1 is required → Uno cannot support this
 
 🪪 RFID Card Registration
+
 Upload the code
-
 Open Serial Monitor
-
 Scan your RFID card
-
 Replace the UID in the code:
-
-cpp
-Copy code
 byte authorizedUID[4] = {0x23, 0x25, 0xF9, 0x12};
+
+
 🔐 PIN & EEPROM Behavior
+
 Master PIN is stored in EEPROM
-
 Default PIN: 1234
-
 PIN persists after power loss
-
 Can be changed via:
-
 Keypad secret combination
-
 Bluetooth command
 
 🛡️ License
+
 This project is released under a custom restrictive license:
-
 Source code may be viewed and studied
-
 Commercial use is not allowed
-
 Claiming the project as your own is not allowed
-
 Original authorship remains with Mhystify
-
 See LICENSE for full terms.
 
 ⚠️ Disclaimer
@@ -205,12 +187,8 @@ All effects are visual and audio only.
 🚀 Final Notes
 QuantumFuse focuses on logic, control flow, and presentation — not danger.
 It is best used as a learning tool, demo system, or escape room prop.
-
 Build smart. Stay ethical. Look cool doing it.
 
 👤 Author
 Developed by Mhystify
 Embedded systems & simulation project
-
-yaml
-Copy code
