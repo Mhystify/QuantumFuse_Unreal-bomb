@@ -14,148 +14,203 @@ It simulates a movie-style control terminal using RFID authentication, keypad in
 - Practice RFID-based authentication
 - Implement state machines and timed events
 - Create an immersive, cinematic terminal-style interaction
-- Learn clean project structure and documentation for GitHub
+- Maintain clean, professional GitHub documentation
 
 ---
 
 ## 🚀 Quick Start
-1. Upload the sketch to your Arduino
-2. Register your RFID card UID
-3. Power the system and scan an authorized card
-4. Enter the correct PIN before the timer reaches zero
+1. Upload the sketch to your Arduino Mega
+2. Register your RFID card UID in the code
+3. Power the system and arm it
+4. Enter the correct PIN and scan the authorized RFID card before the timer reaches zero
 
+---
 
 ## 🧠 Core Scenario (How It Works)
 
 1. **Idle State**
-   - System waits for user interaction
-   - Display shows standby message
-   - Countdown is inactive
+   - System is powered but inactive
+   - Display shows system status
+   - Countdown is stopped
 
-2. **RFID Authentication**
-   - User scans an authorized RFID card
-   - If the card UID matches a registered card:
-     - System unlocks
-     - Countdown begins
-   - Unauthorized cards trigger a warning state
+2. **System Armed**
+   - System is turned on via button or Bluetooth
+   - User is prompted to enter the PIN
 
-3. **Countdown Phase**
-   - Timer starts decreasing (configurable)
-   - Buzzer beeps at intervals
-   - LEDs update based on remaining time
+3. **RFID Authentication**
+   - Authorized RFID card must be scanned
+   - UID is validated against stored value
 
-4. **Code Entry (Disarm Simulation)**
-   - User enters a predefined PIN via keypad
-   - Correct PIN:
-     - Countdown stops
-     - System enters “Disarmed” state
-   - Incorrect PIN:
-     - Time penalty applied
-     - Warning feedback triggered
+4. **Countdown Phase**
+   - Countdown timer starts
+   - Beep rate increases as time decreases
+   - LEDs and buzzer provide feedback
 
-5. **Fail State**
-   - If time reaches zero:
-     - Alarm sound plays
-     - LEDs flash
-     - System locks and requires reset
-   - No physical action occurs (visual/audio only)
+5. **Disarm Procedure**
+   - Correct PIN + valid RFID card
+   - System transitions to “Defused” state
+
+6. **Fail State**
+   - Timer reaches zero or remote trigger is received
+   - Alarm feedback is activated (visual/audio only)
+   - No physical action occurs
 
 ---
 
-## 🔌 Hardware Components
-- Arduino Uno / Nano / compatible board
-- MFRC522 RFID Reader
-- RFID cards or key fobs
-- 4x4 or 3x4 Keypad
-- Active or passive buzzer
-- LEDs (Red / Yellow / Green)
-- 16x2 LCD (I2C recommended)
-- Jumper wires
-- Breadboard or enclosure (optional)
+## 🔧 Hardware Wiring  
+### **Arduino Mega 2560 – REQUIRED**
+
+> ⚠️ Arduino Uno is **NOT supported**  
+> This project requires Arduino Mega due to pin count and hardware serial usage.
+
+### 🧠 Microcontroller
+- **Board:** Arduino Mega 2560  
+- **Logic Voltage:** 5V  
+- **RFID Voltage:** 3.3V (IMPORTANT)
 
 ---
 
-## 📌 Pin Configuration (Example – Arduino Uno)
+## 📟 Module Connections (Exact – Based on Code)
 
-### RFID (MFRC522 – SPI)
-| RFID Pin | Arduino Pin |
-|--------|------------|
-| SDA    | D10        |
-| SCK    | D13        |
-| MOSI   | D11        |
-| MISO   | D12        |
-| RST    | D9         |
-| VCC    | 3.3V       |
-| GND    | GND        |
+### 📡 RFID Reader (MFRC522 – SPI)
 
-### Keypad (4x4 Example)
-| Keypad | Arduino |
-|------|---------|
-| R1   | D2      |
-| R2   | D3      |
-| R3   | D4      |
-| R4   | D5      |
-| C1   | D6      |
-| C2   | D7      |
-| C3   | D8      |
-| C4   | A0      |
+| MFRC522 Pin | Arduino Mega |
+|------------|--------------|
+| SDA (SS) | 53 |
+| SCK | 52 |
+| MOSI | 51 |
+| MISO | 50 |
+| RST | 49 |
+| VCC | 3.3V |
+| GND | GND |
 
-### Output Devices
-| Device | Arduino Pin |
-|------|-------------|
-| Buzzer | A1 |
-| Red LED | A2 |
-| Yellow LED | A3 |
-| Green LED | A4 |
 
-> ⚠️ Pins are configurable. Update them in the code if needed.
+#define SS_PIN 53
+#define RST_PIN 49
+⚠️ Do NOT connect RFID VCC to 5V
 
----
+🔢 Keypad (4x4 Matrix)
+Keypad Pin	Arduino Mega
+R1	22
+R2	23
+R3	24
+R4	25
+C1	26
+C2	27
+C3	28
+C4	29
 
-## 🪪 RFID Card Registration (Important)
+cpp
+Copy code
+byte rowPins[4] = {22, 23, 24, 25};
+byte colPins[4] = {26, 27, 28, 29};
+📺 LCD Display (16x2 I2C)
+LCD Pin	Arduino Mega
+VCC	5V
+GND	GND
+SDA	20
+SCL	21
 
-1. Upload the **RFID UID reader sketch**
-2. Open Serial Monitor (9600 baud)
-3. Scan your RFID card
-4. Copy the UID printed in Serial Monitor
-5. Paste the UID into the main code:
+cpp
+Copy code
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+Default I2C address: 0x27
 
-🔐 PIN Configuration
+💡 LEDs
+LED	Arduino Mega
+Green LED	2
+Red LED	3
 
-The disarm PIN is defined in the code:
+Use 220Ω resistors in series
 
-const String correctPIN = "1234";
+cpp
+Copy code
+#define GREEN_LED 2
+#define RED_LED 3
+🔊 Buzzer
+Buzzer	Arduino Mega
+Signal	4
+GND	GND
 
-Length is configurable
-Wrong attempts can:
-Reduce remaining time
-Trigger warnings
-Lock the system (optional)
+cpp
+Copy code
+#define BUZZER 4
+🔘 Arm / System Button
+Button	Arduino Mega
+Signal	5
+Other Side	GND
 
+cpp
+Copy code
+#define ARM_BUTTON 5
+Uses INPUT_PULLUP
+
+Button is active LOW
+
+📶 Bluetooth Module (HC‑05 / HC‑06)
+Bluetooth	Arduino Mega
+TX	RX1 (19)
+RX	TX1 (18)
+VCC	5V
+GND	GND
+
+cpp
+Copy code
+Serial1.begin(9600);
+Hardware Serial1 is required → Uno cannot support this
+
+🪪 RFID Card Registration
+Upload the code
+
+Open Serial Monitor
+
+Scan your RFID card
+
+Replace the UID in the code:
+
+cpp
+Copy code
+byte authorizedUID[4] = {0x23, 0x25, 0xF9, 0x12};
+🔐 PIN & EEPROM Behavior
+Master PIN is stored in EEPROM
+
+Default PIN: 1234
+
+PIN persists after power loss
+
+Can be changed via:
+
+Keypad secret combination
+
+Bluetooth command
 
 🛡️ License
+This project is released under a custom restrictive license:
 
-This project uses a custom restrictive license:
-Others may view and learn from the code
+Source code may be viewed and studied
+
 Commercial use is not allowed
-Claiming the project as their own is not allowed
+
+Claiming the project as your own is not allowed
+
 Original authorship remains with Mhystify
+
 See LICENSE for full terms.
 
-
 ⚠️ Disclaimer
-
 This project is a fictional simulation.
-Any resemblance to real-world devices is purely aesthetic.
-Do not use this project in public spaces, schools, or environments where it could cause fear or confusion.
+It must not be used in public spaces, schools, or environments where it could cause fear or confusion.
+All effects are visual and audio only.
 
 🚀 Final Notes
+QuantumFuse focuses on logic, control flow, and presentation — not danger.
+It is best used as a learning tool, demo system, or escape room prop.
 
-QuantumFuse is about logic, control flow, and presentation — not danger.
-Think of it as a hands-on lesson in embedded systems with style.
 Build smart. Stay ethical. Look cool doing it.
 
-
-## 👤 Author
-Developed by Mhystify 
+👤 Author
+Developed by Mhystify
 Embedded systems & simulation project
+
+yaml
+Copy code
